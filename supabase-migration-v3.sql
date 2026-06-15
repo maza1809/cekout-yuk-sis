@@ -1,0 +1,99 @@
+-- Migration v3: Full anon CRUD access for admin tables
+-- Run ALL in Supabase SQL Editor
+
+-- =====================
+-- PRODUCTS
+-- =====================
+DROP POLICY IF EXISTS "Public read access" ON products;
+DROP POLICY IF EXISTS "Admin full access" ON products;
+CREATE POLICY "anon select" ON products FOR SELECT USING (true);
+CREATE POLICY "anon insert" ON products FOR INSERT WITH CHECK (true);
+CREATE POLICY "anon update" ON products FOR UPDATE USING (true);
+CREATE POLICY "anon delete" ON products FOR DELETE USING (true);
+
+-- =====================
+-- CATEGORIES
+-- =====================
+DROP POLICY IF EXISTS "Public read active" ON categories;
+DROP POLICY IF EXISTS "Admin full access" ON categories;
+CREATE POLICY "anon select" ON categories FOR SELECT USING (true);
+CREATE POLICY "anon insert" ON categories FOR INSERT WITH CHECK (true);
+CREATE POLICY "anon update" ON categories FOR UPDATE USING (true);
+CREATE POLICY "anon delete" ON categories FOR DELETE USING (true);
+
+-- =====================
+-- BRANDS
+-- =====================
+DROP POLICY IF EXISTS "Public read" ON brands;
+DROP POLICY IF EXISTS "Admin full access" ON brands;
+CREATE POLICY "anon select" ON brands FOR SELECT USING (true);
+CREATE POLICY "anon insert" ON brands FOR INSERT WITH CHECK (true);
+CREATE POLICY "anon update" ON brands FOR UPDATE USING (true);
+CREATE POLICY "anon delete" ON brands FOR DELETE USING (true);
+
+-- =====================
+-- BANNERS
+-- =====================
+DROP POLICY IF EXISTS "Public read active" ON banners;
+DROP POLICY IF EXISTS "Admin full access" ON banners;
+CREATE POLICY "anon select" ON banners FOR SELECT USING (true);
+CREATE POLICY "anon insert" ON banners FOR INSERT WITH CHECK (true);
+CREATE POLICY "anon update" ON banners FOR UPDATE USING (true);
+CREATE POLICY "anon delete" ON banners FOR DELETE USING (true);
+
+-- =====================
+-- SOCIAL MEDIA
+-- =====================
+DROP POLICY IF EXISTS "Public read active" ON social_media;
+CREATE POLICY "anon select" ON social_media FOR SELECT USING (true);
+CREATE POLICY "anon insert" ON social_media FOR INSERT WITH CHECK (true);
+CREATE POLICY "anon update" ON social_media FOR UPDATE USING (true);
+CREATE POLICY "anon delete" ON social_media FOR DELETE USING (true);
+
+-- =====================
+-- SETTINGS
+-- =====================
+DROP POLICY IF EXISTS "Public read" ON settings;
+CREATE POLICY "anon select" ON settings FOR SELECT USING (true);
+CREATE POLICY "anon insert" ON settings FOR INSERT WITH CHECK (true);
+CREATE POLICY "anon update" ON settings FOR UPDATE USING (true);
+CREATE POLICY "anon delete" ON settings FOR DELETE USING (true);
+
+-- =====================
+-- SEO META
+-- =====================
+DROP POLICY IF EXISTS "Public read" ON seo_meta;
+CREATE POLICY "anon select" ON seo_meta FOR SELECT USING (true);
+CREATE POLICY "anon insert" ON seo_meta FOR INSERT WITH CHECK (true);
+CREATE POLICY "anon update" ON seo_meta FOR UPDATE USING (true);
+CREATE POLICY "anon delete" ON seo_meta FOR DELETE USING (true);
+
+-- =====================
+-- PAGES
+-- =====================
+DROP POLICY IF EXISTS "Public read published" ON pages;
+CREATE POLICY "anon select" ON pages FOR SELECT USING (true);
+CREATE POLICY "anon insert" ON pages FOR INSERT WITH CHECK (true);
+CREATE POLICY "anon update" ON pages FOR UPDATE USING (true);
+CREATE POLICY "anon delete" ON pages FOR DELETE USING (true);
+
+-- =====================
+-- SUBSCRIBERS
+-- =====================
+DROP POLICY IF EXISTS "Public insert" ON subscribers;
+CREATE POLICY "anon select" ON subscribers FOR SELECT USING (true);
+CREATE POLICY "anon insert" ON subscribers FOR INSERT WITH CHECK (true);
+CREATE POLICY "anon delete" ON subscribers FOR DELETE USING (true);
+
+-- =====================
+-- USERS (admin users)
+-- =====================
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "anon select" ON users;
+DROP POLICY IF EXISTS "anon insert" ON users;
+DROP POLICY IF EXISTS "anon update" ON users;
+DROP POLICY IF EXISTS "anon delete" ON users;
+CREATE POLICY "anon select" ON users FOR SELECT USING (true);
+CREATE POLICY "anon insert" ON users FOR INSERT WITH CHECK (true);
+CREATE POLICY "anon update" ON users FOR UPDATE USING (true);
+CREATE POLICY "anon delete" ON users FOR DELETE USING (true);
