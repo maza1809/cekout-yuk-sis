@@ -181,8 +181,7 @@ export default function AnalyticsPage() {
   React.useEffect(() => {
     db.getAnalytics().then((data) => {
       if (data) setAnalytics(data)
-      setLoading(false)
-    })
+    }).catch(() => {}).finally(() => setLoading(false))
   }, [])
 
   const data = analytics || demoAnalytics[range] || demoAnalytics["7"]

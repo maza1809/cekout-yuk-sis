@@ -116,17 +116,16 @@ export default function KontenPage() {
       is_published: form.is_published,
     }
     setPages((prev) => prev.map((p) => (p.id === editingId ? updatedPage : p)))
-    await db.upsertPage({
-      id: updatedPage.id,
-      slug: updatedPage.slug,
-      title: updatedPage.title,
-      content: updatedPage.content,
-      meta_title: updatedPage.meta_title,
-      meta_description: updatedPage.meta_description,
-      is_published: updatedPage.is_published,
-    })
+    const { id: _pid, ...pageData } = updatedPage
+    const result = await db.upsertPage(pageData)
+    if (result) {
+      setPages((prev) => prev.map((p) => (p.id === editingId ? result : p)))
+      toast.success("Halaman berhasil diperbarui")
+    } else {
+      setPages((prev) => prev.map((p) => (p.id === editingId ? page : p)))
+      toast.error("Gagal menyimpan perubahan")
+    }
     setEditDialogOpen(false)
-    toast.success("Halaman berhasil diperbarui")
   }
 
   const togglePublish = async (id: string) => {
@@ -134,16 +133,15 @@ export default function KontenPage() {
     if (!page) return
     const updated = { ...page, is_published: !page.is_published }
     setPages((prev) => prev.map((p) => (p.id === id ? updated : p)))
-    await db.upsertPage({
-      id: updated.id,
-      slug: updated.slug,
-      title: updated.title,
-      content: updated.content,
-      meta_title: updated.meta_title,
-      meta_description: updated.meta_description,
-      is_published: updated.is_published,
-    })
-    toast.success("Status publikasi diubah")
+    const { id: _pid, ...pageData } = updated
+    const result = await db.upsertPage(pageData)
+    if (result) {
+      setPages((prev) => prev.map((p) => (p.id === id ? result : p)))
+      toast.success("Status publikasi diubah")
+    } else {
+      setPages((prev) => prev.map((p) => (p.id === id ? page : p)))
+      toast.error("Gagal menyimpan perubahan")
+    }
   }
 
   return (

@@ -12,18 +12,11 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
+import { MediaItem } from "@/types"
+import { db } from "@/lib/services/supabase-service"
 import { formatDate } from "@/lib/utils"
 import { toast } from "sonner"
 import { Plus, Trash2, Copy, Image as ImageIcon, FileText, Video, Music } from "lucide-react"
-
-type MediaItem = {
-  id: string
-  name: string
-  url: string
-  size: string
-  type: string
-  created_at: string
-}
 
 const fileIcons: Record<string, React.ReactNode> = {
   image: <ImageIcon className="h-6 w-6" />,
@@ -48,6 +41,12 @@ export default function MediaPage() {
   const [uploadUrl, setUploadUrl] = React.useState("")
   const [uploadDialogOpen, setUploadDialogOpen] = React.useState(false)
 
+  React.useEffect(() => {
+    db.media().then((rows) => {
+      if (rows.length > 0) setMedia(rows)
+    })
+  }, [])
+
   const handleCopyUrl = async (url: string) => {
     try {
       await navigator.clipboard.writeText(url)
@@ -57,15 +56,23 @@ export default function MediaPage() {
     }
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteId) return
+    const item = media.find((m) => m.id === deleteId)
+    if (!item) return
     setMedia((prev) => prev.filter((m) => m.id !== deleteId))
-    toast.success("Media berhasil dihapus")
+    const success = await db.deleteMedia(deleteId)
+    if (success) {
+      toast.success("Media berhasil dihapus")
+    } else {
+      setMedia((prev) => [item, ...prev])
+      toast.error("Gagal menghapus media")
+    }
     setDeleteDialogOpen(false)
     setDeleteId(null)
   }
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!uploadUrl.trim()) return
     const now = new Date().toISOString()
     const newItem: MediaItem = {
@@ -79,7 +86,15 @@ export default function MediaPage() {
     setMedia((prev) => [newItem, ...prev])
     setUploadUrl("")
     setUploadDialogOpen(false)
-    toast.success("Media berhasil ditambahkan")
+    const { id: _mid, ...itemData } = newItem
+    const result = await db.upsertMedia(itemData as MediaItem)
+    if (result) {
+      setMedia((prev) => prev.map((m) => (m.id === newItem.id ? result : m)))
+      toast.success("Media berhasil ditambahkan")
+    } else {
+      setMedia((prev) => prev.filter((m) => m.id !== newItem.id))
+      toast.error("Gagal menambahkan media")
+    }
   }
 
   return (

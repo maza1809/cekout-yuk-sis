@@ -163,6 +163,15 @@ export interface AdminUser {
   created_at: string
 }
 
+export interface MediaItem {
+  id: string
+  name: string
+  url: string
+  size: string
+  type: string
+  created_at: string
+}
+
 export type SortOption =
   | "newest"
   | "trending"

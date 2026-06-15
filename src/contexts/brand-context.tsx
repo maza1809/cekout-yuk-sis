@@ -22,17 +22,17 @@ export function BrandProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     async function init() {
+      const data = await db.brands()
+      if (data && data.length > 0) {
+        setBrands(data)
+        return
+      }
       const stored = localStorage.getItem(STORAGE_KEY)
       if (stored) {
         try { setBrands(JSON.parse(stored)); return }
         catch { /* ignore */ }
       }
-      const data = await db.brands()
-      if (data && data.length > 0) {
-        setBrands(data)
-      } else {
-        setBrands(defaultBrands)
-      }
+      setBrands(defaultBrands)
     }
     init()
   }, [])

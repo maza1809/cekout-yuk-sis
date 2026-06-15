@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Switch } from "@/components/ui/switch"
 import {
   Dialog,
   DialogContent,
@@ -86,16 +85,6 @@ export default function SosialMediaPage() {
     setEditDialogOpen(false)
   }
 
-  const toggleActive = async (id: string) => {
-    const target = platforms.find((p) => p.id === id)
-    if (!target) return
-    const updated = { ...target, is_active: !target.is_active, updated_at: new Date().toISOString() }
-    setPlatforms((prev) =>
-      prev.map((p) => (p.id === id ? updated : p))
-    )
-    await db.upsertSocialMedia(updated)
-  }
-
   return (
     <div className="space-y-6">
       <div>
@@ -126,10 +115,6 @@ export default function SosialMediaPage() {
               <div className="hidden items-center gap-2 sm:flex" />
             </div>
             <div className="flex items-center gap-2 sm:shrink-0">
-              <Switch
-                checked={item.is_active}
-                onCheckedChange={() => toggleActive(item.id)}
-              />
               <Button
                 variant="ghost"
                 size="icon"

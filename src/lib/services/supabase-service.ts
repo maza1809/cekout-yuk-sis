@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase"
 import type {
   Product, Brand, Category, Banner, SocialMedia,
-  SiteSetting, SEOData, PageContent, ClickEvent, AdminUser, AnalyticsData
+  SiteSetting, SEOData, PageContent, ClickEvent, AdminUser, AnalyticsData, MediaItem
 } from "@/types"
 
 export const db = {
@@ -387,5 +387,29 @@ export const db = {
       })
       await supabase.rpc("increment_click_count", { row_id: productId }).then(() => {})
     } catch { /* silent */ }
+  },
+
+  async media(): Promise<MediaItem[]> {
+    if (!supabase) return []
+    try {
+      const { data } = await supabase.from("media").select("*").order("created_at", { ascending: false })
+      return (data as MediaItem[]) || []
+    } catch { return [] }
+  },
+
+  async upsertMedia(item: Partial<MediaItem> & { id?: string }): Promise<MediaItem | null> {
+    if (!supabase) return null
+    try {
+      const { data } = await supabase.from("media").upsert(item).select().single()
+      return data as MediaItem | null
+    } catch { return null }
+  },
+
+  async deleteMedia(id: string): Promise<boolean> {
+    if (!supabase) return false
+    try {
+      const { error } = await supabase.from("media").delete().eq("id", id)
+      return !error
+    } catch { return false }
   },
 }
