@@ -63,10 +63,14 @@ CREATE POLICY "Public read active" ON banners FOR SELECT USING (is_active = true
 CREATE POLICY "Public read active" ON social_media FOR SELECT USING (is_active = true);
 
 -- Ensure all tables can be read
-CREATE POLICY IF NOT EXISTS "Public read" ON settings FOR SELECT USING (true);
-CREATE POLICY IF NOT EXISTS "Public read" ON seo_meta FOR SELECT USING (true);
-CREATE POLICY IF NOT EXISTS "Public read published" ON pages FOR SELECT USING (is_published = true);
-CREATE POLICY IF NOT EXISTS "Public insert" ON subscribers FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Public read" ON settings;
+DROP POLICY IF EXISTS "Public read" ON seo_meta;
+DROP POLICY IF EXISTS "Public read published" ON pages;
+DROP POLICY IF EXISTS "Public insert" ON subscribers;
+CREATE POLICY "Public read" ON settings FOR SELECT USING (true);
+CREATE POLICY "Public read" ON seo_meta FOR SELECT USING (true);
+CREATE POLICY "Public read published" ON pages FOR SELECT USING (is_published = true);
+CREATE POLICY "Public insert" ON subscribers FOR INSERT WITH CHECK (true);
 
 -- Seed products (13 products)
 INSERT INTO products (name, slug, brand_id, category_id, description, benefits, how_to_use, specifications, price, original_price, rating, review_count, images, affiliate_url, affiliate_platform, is_published, is_featured, is_viral, is_new, viral_score, tags, click_count) VALUES

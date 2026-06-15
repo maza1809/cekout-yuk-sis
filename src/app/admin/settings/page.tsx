@@ -123,17 +123,19 @@ export default function SettingsPage() {
     })
   }, [])
 
-  const saveToSupabase = () => {
-    db.upsertSetting({ key: "admin_general", value: JSON.stringify(general), type: "json" })
-    db.upsertSetting({ key: "admin_seo_defaults", value: JSON.stringify(seo), type: "json" })
-    db.upsertSetting({ key: "admin_scripts", value: JSON.stringify(scripts), type: "json" })
-    db.upsertSetting({ key: "admin_social", value: JSON.stringify(social), type: "json" })
+  const saveToSupabase = async () => {
+    await Promise.all([
+      db.upsertSetting({ key: "admin_general", value: JSON.stringify(general), type: "json" }),
+      db.upsertSetting({ key: "admin_seo_defaults", value: JSON.stringify(seo), type: "json" }),
+      db.upsertSetting({ key: "admin_scripts", value: JSON.stringify(scripts), type: "json" }),
+      db.upsertSetting({ key: "admin_social", value: JSON.stringify(social), type: "json" }),
+    ])
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const data = { general, seo, scripts, social }
     localStorage.setItem("admin_settings", JSON.stringify(data))
-    saveToSupabase()
+    await saveToSupabase()
     toast.success("Pengaturan berhasil disimpan")
   }
 

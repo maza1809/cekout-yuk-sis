@@ -112,11 +112,11 @@ export default function SEOPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const updated = { ...seoData, [selectedPage]: form }
     setSeoData(updated)
     localStorage.setItem("admin_seo", JSON.stringify(updated))
-    db.upsertSeoMeta({
+    await db.upsertSeoMeta({
       page: selectedPage,
       title: form.title,
       description: form.description,

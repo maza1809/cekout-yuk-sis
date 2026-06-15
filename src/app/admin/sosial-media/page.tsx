@@ -71,7 +71,7 @@ export default function SosialMediaPage() {
     return Object.keys(errs).length === 0
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validate()) return
     if (!editingId) return
     setPlatforms((prev) =>
@@ -81,21 +81,19 @@ export default function SosialMediaPage() {
           : p
       )
     )
-    db.upsertSocialMedia({ ...form, id: editingId, updated_at: new Date().toISOString() })
+    await db.upsertSocialMedia({ ...form, id: editingId, updated_at: new Date().toISOString() })
     toast.success("Platform berhasil diperbarui")
     setEditDialogOpen(false)
   }
 
-  const toggleActive = (id: string) => {
-    setPlatforms((prev) => {
-      const target = prev.find((p) => p.id === id)
-      if (target) {
-        db.upsertSocialMedia({ ...target, is_active: !target.is_active, updated_at: new Date().toISOString() })
-      }
-      return prev.map((p) =>
-        p.id === id ? { ...p, is_active: !p.is_active, updated_at: new Date().toISOString() } : p
-      )
-    })
+  const toggleActive = async (id: string) => {
+    const target = platforms.find((p) => p.id === id)
+    if (!target) return
+    const updated = { ...target, is_active: !target.is_active, updated_at: new Date().toISOString() }
+    setPlatforms((prev) =>
+      prev.map((p) => (p.id === id ? updated : p))
+    )
+    await db.upsertSocialMedia(updated)
   }
 
   return (

@@ -128,7 +128,7 @@ export default function AdminPenggunaPage() {
     return Object.keys(errs).length === 0
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validate()) return
     const now = new Date().toISOString()
 
@@ -143,7 +143,7 @@ export default function AdminPenggunaPage() {
       setUsers((prev) =>
         prev.map((u) => (u.id === editingId ? { ...u, ...updates } : u))
       )
-      db.upsertAdminUser({ id: editingId, ...updates } as AdminUser)
+      await db.upsertAdminUser({ id: editingId, ...updates } as AdminUser)
       toast.success("Pengguna berhasil diperbarui")
     } else {
       const newUser: StoredUser = {
@@ -157,30 +157,28 @@ export default function AdminPenggunaPage() {
         password: form.password,
       }
       setUsers((prev) => [...prev, newUser])
-      db.upsertAdminUser(newUser as AdminUser)
+      const { id: _uid, ...userData } = newUser
+      await db.upsertAdminUser(userData as AdminUser)
       toast.success("Pengguna berhasil ditambahkan")
     }
     setDialogOpen(false)
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteId) return
     setUsers((prev) => prev.filter((u) => u.id !== deleteId))
-    db.deleteAdminUser(deleteId)
+    await db.deleteAdminUser(deleteId)
     toast.success("Pengguna berhasil dihapus")
     setDeleteDialogOpen(false)
     setDeleteId(null)
   }
 
-  const toggleActive = (id: string) => {
-    setUsers((prev) => {
-      const updated = prev.map((u) =>
-        u.id === id ? { ...u, is_active: !u.is_active } : u
-      )
-      const toggled = updated.find((u) => u.id === id)
-      if (toggled) db.upsertAdminUser({ id, is_active: toggled.is_active } as AdminUser)
-      return updated
-    })
+  const toggleActive = async (id: string) => {
+    const user = users.find((u) => u.id === id)
+    if (!user) return
+    const toggled = { ...user, is_active: !user.is_active }
+    setUsers((prev) => prev.map((u) => (u.id === id ? toggled : u)))
+    await db.upsertAdminUser({ id, is_active: toggled.is_active } as AdminUser)
   }
 
   return (

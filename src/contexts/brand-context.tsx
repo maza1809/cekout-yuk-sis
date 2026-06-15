@@ -45,7 +45,8 @@ export function BrandProvider({ children }: { children: React.ReactNode }) {
 
   const addBrand = useCallback((brand: Brand) => {
     setBrands((prev) => [brand, ...prev])
-    db.upsertBrand(brand)
+    const { id: _id, ...brandData } = brand
+    db.upsertBrand(brandData as Brand)
   }, [])
 
   const updateBrand = useCallback((id: string, updates: Partial<Brand>) => {

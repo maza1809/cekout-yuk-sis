@@ -131,7 +131,7 @@ export default function BannerPage() {
     return Object.keys(errs).length === 0
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validate()) return
     const now = new Date().toISOString()
 
@@ -141,7 +141,7 @@ export default function BannerPage() {
           b.id === editingId ? { ...b, ...form, updated_at: now } : b
         )
       )
-      db.upsertBanner({ ...form, id: editingId, updated_at: now })
+      await db.upsertBanner({ ...form, id: editingId, updated_at: now })
       toast.success("Banner berhasil diperbarui")
     } else {
       const newBanner: Banner = {
@@ -151,31 +151,28 @@ export default function BannerPage() {
         ...form,
       }
       setBanners((prev) => [...prev, newBanner])
-      db.upsertBanner(newBanner)
+      const { id: _bid, ...bannerData } = newBanner
+      await db.upsertBanner(bannerData as Banner)
       toast.success("Banner berhasil ditambahkan")
     }
     setDialogOpen(false)
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteId) return
     setBanners((prev) => prev.filter((b) => b.id !== deleteId))
-    db.deleteBanner(deleteId)
+    await db.deleteBanner(deleteId)
     toast.success("Banner berhasil dihapus")
     setDeleteDialogOpen(false)
     setDeleteId(null)
   }
 
-  const toggleActive = (id: string) => {
-    setBanners((prev) => {
-      const target = prev.find((b) => b.id === id)
-      if (target) {
-        db.upsertBanner({ ...target, is_active: !target.is_active, updated_at: new Date().toISOString() })
-      }
-      return prev.map((b) =>
-        b.id === id ? { ...b, is_active: !b.is_active, updated_at: new Date().toISOString() } : b
-      )
-    })
+  const toggleActive = async (id: string) => {
+    const target = banners.find((b) => b.id === id)
+    if (!target) return
+    const updated = { ...target, is_active: !target.is_active, updated_at: new Date().toISOString() }
+    setBanners((prev) => prev.map((b) => (b.id === id ? updated : b)))
+    await db.upsertBanner(updated)
   }
 
   return (

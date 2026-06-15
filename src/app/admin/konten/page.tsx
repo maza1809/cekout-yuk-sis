@@ -102,58 +102,46 @@ export default function KontenPage() {
     return Object.keys(errs).length === 0
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validate()) return
     if (!editingId) return
-    setPages((prev) => {
-      const updated = prev.map((p) =>
-        p.id === editingId
-          ? {
-              ...p,
-              title: form.title,
-              meta_title: form.meta_title,
-              meta_description: form.meta_description,
-              content: form.content,
-              is_published: form.is_published,
-            }
-          : p
-      )
-      const page = updated.find((p) => p.id === editingId)
-      if (page) {
-        db.upsertPage({
-          id: page.id,
-          slug: page.slug,
-          title: page.title,
-          content: page.content,
-          meta_title: page.meta_title,
-          meta_description: page.meta_description,
-          is_published: page.is_published,
-        })
-      }
-      return updated
+    const page = pages.find((p) => p.id === editingId)
+    if (!page) return
+    const updatedPage = {
+      ...page,
+      title: form.title,
+      meta_title: form.meta_title,
+      meta_description: form.meta_description,
+      content: form.content,
+      is_published: form.is_published,
+    }
+    setPages((prev) => prev.map((p) => (p.id === editingId ? updatedPage : p)))
+    await db.upsertPage({
+      id: updatedPage.id,
+      slug: updatedPage.slug,
+      title: updatedPage.title,
+      content: updatedPage.content,
+      meta_title: updatedPage.meta_title,
+      meta_description: updatedPage.meta_description,
+      is_published: updatedPage.is_published,
     })
-    toast.success("Halaman berhasil diperbarui")
     setEditDialogOpen(false)
+    toast.success("Halaman berhasil diperbarui")
   }
 
-  const togglePublish = (id: string) => {
-    setPages((prev) => {
-      const updated = prev.map((p) =>
-        p.id === id ? { ...p, is_published: !p.is_published } : p
-      )
-      const page = updated.find((p) => p.id === id)
-      if (page) {
-        db.upsertPage({
-          id: page.id,
-          slug: page.slug,
-          title: page.title,
-          content: page.content,
-          meta_title: page.meta_title,
-          meta_description: page.meta_description,
-          is_published: page.is_published,
-        })
-      }
-      return updated
+  const togglePublish = async (id: string) => {
+    const page = pages.find((p) => p.id === id)
+    if (!page) return
+    const updated = { ...page, is_published: !page.is_published }
+    setPages((prev) => prev.map((p) => (p.id === id ? updated : p)))
+    await db.upsertPage({
+      id: updated.id,
+      slug: updated.slug,
+      title: updated.title,
+      content: updated.content,
+      meta_title: updated.meta_title,
+      meta_description: updated.meta_description,
+      is_published: updated.is_published,
     })
     toast.success("Status publikasi diubah")
   }

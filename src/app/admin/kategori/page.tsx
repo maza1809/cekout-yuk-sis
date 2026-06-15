@@ -178,7 +178,8 @@ export default function KategoriPage() {
         sort_order: form.sort_order,
       }
       setCategories((prev) => [...prev, newCat])
-      await db.upsertCategory(newCat)
+      const { id: _cid, ...catData } = newCat
+      await db.upsertCategory(catData as Category)
       toast.success("Kategori berhasil ditambahkan")
     }
     setDialogOpen(false)

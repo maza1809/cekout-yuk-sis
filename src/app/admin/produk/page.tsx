@@ -417,7 +417,8 @@ export default function ProdukPage() {
         click_count: 0,
       }
       setProducts((prev) => [newProduct, ...prev])
-      await db.upsertProduct(newProduct)
+      const { id: _pid, ...productData } = newProduct
+      await db.upsertProduct(productData as Product)
       toast.success("Produk berhasil ditambahkan")
     }
     setDialogOpen(false)
