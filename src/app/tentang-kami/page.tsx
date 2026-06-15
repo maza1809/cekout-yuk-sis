@@ -59,7 +59,7 @@ export default function TentangKamiPage() {
           </motion.div>
           <motion.h1
             variants={fadeIn}
-            className="mb-6 text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl"
+            className="mb-6 text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl lg:text-6xl"
           >
             Tentang{" "}
             <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
@@ -68,7 +68,7 @@ export default function TentangKamiPage() {
           </motion.h1>
           <motion.p
             variants={fadeIn}
-            className="mx-auto max-w-2xl text-lg text-muted-foreground"
+            className="mx-auto max-w-2xl text-base text-muted-foreground sm:text-lg"
           >
             Platform kurasi produk pilihan untuk wanita Indonesia. Kami membantu kamu menemukan
             produk terbaik, viral, dan terpercaya dari berbagai marketplace.
@@ -86,7 +86,7 @@ export default function TentangKamiPage() {
             className="grid gap-12 md:grid-cols-2"
           >
             <motion.div variants={fadeIn} className="space-y-4">
-              <h2 className="text-3xl font-bold md:text-4xl">Misi Kami</h2>
+              <h2 className="text-2xl font-bold sm:text-3xl md:text-4xl">Misi Kami</h2>
               <div className="h-1 w-20 rounded-full bg-primary" />
               <p className="text-muted-foreground leading-relaxed">
                 Misi kami adalah membantu wanita Indonesia menemukan produk-produk terbaik yang
@@ -123,7 +123,7 @@ export default function TentangKamiPage() {
             variants={staggerContainer}
             className="mb-12 text-center"
           >
-            <motion.h2 variants={fadeIn} className="mb-4 text-3xl font-bold md:text-4xl">
+            <motion.h2 variants={fadeIn} className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">
               Nilai-Nilai Kami
             </motion.h2>
             <motion.p variants={fadeIn} className="text-muted-foreground">
@@ -165,7 +165,7 @@ export default function TentangKamiPage() {
             variants={staggerContainer}
             className="mb-12 text-center"
           >
-            <motion.h2 variants={fadeIn} className="mb-4 text-3xl font-bold md:text-4xl">
+            <motion.h2 variants={fadeIn} className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">
               Tim Kami
             </motion.h2>
             <motion.p variants={fadeIn} className="text-muted-foreground">
@@ -216,7 +216,7 @@ export default function TentangKamiPage() {
                 variants={fadeIn}
                 className="text-center"
               >
-                <div className="text-4xl font-bold text-primary md:text-5xl">
+                <div className="text-3xl font-bold text-primary sm:text-4xl md:text-5xl">
                   {stat.value}
                 </div>
                 <div className="mt-2 text-sm font-medium text-muted-foreground">

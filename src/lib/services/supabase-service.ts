@@ -108,7 +108,25 @@ export const db = {
       let q = supabase.from("brands").select("*").order("name", { ascending: true })
       if (featuredOnly) q = q.eq("is_featured", true)
       const { data } = await q
-      return (data as Brand[]) || []
+      const brands = (data as Brand[]) || []
+
+      const { data: products } = await supabase
+        .from("products")
+        .select("brand_id")
+        .eq("is_published", true)
+
+      if (products) {
+        const counts: Record<string, number> = {}
+        products.forEach((p: { brand_id: string }) => {
+          counts[p.brand_id] = (counts[p.brand_id] || 0) + 1
+        })
+        return brands.map((b) => ({
+          ...b,
+          product_count: counts[b.id] || 0,
+        }))
+      }
+
+      return brands
     } catch { return [] }
   },
 
