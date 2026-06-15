@@ -4,7 +4,6 @@ import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
 import {
   Dialog,
   DialogContent,
@@ -105,9 +104,6 @@ export default function SosialMediaPage() {
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="font-semibold">{item.platform}</h3>
-                  <Badge variant={item.is_active ? "default" : "secondary"} className="text-[10px]">
-                    {item.is_active ? "Active" : "Inactive"}
-                  </Badge>
                 </div>
                 <p className="text-sm text-muted-foreground truncate max-w-md">{item.url}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>

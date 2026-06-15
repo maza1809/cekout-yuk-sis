@@ -180,7 +180,7 @@ export default function AnalyticsPage() {
 
   React.useEffect(() => {
     db.getAnalytics().then((data) => {
-      if (data) setAnalytics(data)
+      if (data && data.total_clicks > 0) setAnalytics(data)
     }).catch(() => {}).finally(() => setLoading(false))
   }, [])
 

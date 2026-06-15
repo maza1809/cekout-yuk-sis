@@ -18,7 +18,6 @@ import {
   Tags,
   Image,
   FileText,
-  ImagePlus,
   Share2,
   Users,
   Search,
@@ -39,7 +38,7 @@ const allNavItems = [
   { href: "/admin/kategori", label: "Kategori", icon: Tags, roles: ["superadmin", "admin"] },
   { href: "/admin/banner", label: "Banner", icon: Image, roles: ["superadmin", "admin"] },
   { href: "/admin/konten", label: "Konten", icon: FileText, roles: ["superadmin"] },
-  { href: "/admin/media", label: "Media", icon: ImagePlus, roles: ["superadmin", "admin"] },
+
   { href: "/admin/sosial-media", label: "Sosial Media", icon: Share2, roles: ["superadmin"] },
   { href: "/admin/admin-pengguna", label: "Admin Pengguna", icon: Users, roles: ["superadmin"] },
   { href: "/admin/seo", label: "SEO", icon: Search, roles: ["superadmin"] },

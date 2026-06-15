@@ -56,6 +56,15 @@ const defaultPages: PageContent[] = [
     meta_description: "Disclaimer Cekout Yuk Sis platform kurasi produk.",
     is_published: false,
   },
+  {
+    id: "p5",
+    slug: "hubungi-kami",
+    title: "Hubungi Kami",
+    content: "<h2>Hubungi Kami</h2>\n<p>Silakan hubungi kami melalui email atau media sosial untuk pertanyaan, saran, atau kerjasama.</p>\n<p>Email: support@cekoutyuk.sis</p>",
+    meta_title: "Hubungi Kami - Cekout Yuk Sis",
+    meta_description: "Hubungi tim Cekout Yuk Sis untuk pertanyaan dan kerjasama.",
+    is_published: true,
+  },
 ]
 
 type FormData = {
@@ -77,7 +86,15 @@ export default function KontenPage() {
 
   React.useEffect(() => {
     db.pages(false).then((rows) => {
-      if (rows.length) setPages(rows)
+      if (rows.length) {
+        const merged = [...defaultPages]
+        for (const row of rows) {
+          const idx = merged.findIndex((p) => p.slug === row.slug)
+          if (idx >= 0) merged[idx] = row
+          else merged.push(row)
+        }
+        setPages(merged)
+      }
     })
   }, [])
 
