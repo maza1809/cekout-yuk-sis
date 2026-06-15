@@ -62,7 +62,6 @@ export default function LoginPage() {
           is_active: true,
         })
       )
-      toast.success(`Selamat datang, ${localUser.name}!`, { duration: 30000 })
       router.push("/admin/dashboard")
       setLoading(false)
       return
@@ -83,7 +82,6 @@ export default function LoginPage() {
               is_active: true,
             })
           )
-          toast.success(`Selamat datang, ${userData.name}!`, { duration: 30000 })
           router.push("/admin/dashboard")
           setLoading(false)
           return
