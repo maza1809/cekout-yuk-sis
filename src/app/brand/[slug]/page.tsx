@@ -134,16 +134,6 @@ const demoProducts: Product[] = [
   },
 ]
 
-const [products, setProducts] = useState<Product[]>(demoProducts)
-
-useEffect(() => {
-  async function fetchData() {
-    const data = await db.products({ published: true })
-    if (data && data.length > 0) setProducts(data)
-  }
-  fetchData()
-}, [])
-
 const tabs = [
   { id: "all", label: "Semua Produk" },
 ] as const
@@ -156,6 +146,15 @@ export default function BrandDetailPage() {
   const { brands } = useBrands()
   const [activeTab, setActiveTab] = useState<TabId>("all")
   const [copied, setCopied] = useState(false)
+  const [products, setProducts] = useState<Product[]>(demoProducts)
+
+  useEffect(() => {
+    async function fetchData() {
+      const data = await db.products({ published: true })
+      if (data && data.length > 0) setProducts(data)
+    }
+    fetchData()
+  }, [])
 
   const brand = brands.find((b) => b.slug === slug)
 

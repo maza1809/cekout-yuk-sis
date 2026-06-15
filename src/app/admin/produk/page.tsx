@@ -204,27 +204,6 @@ const defaultProducts: Product[] = [
   },
 ]
 
-const [brandOptions, setBrandOptions] = React.useState([
-  { id: "b1", name: "Skintific" },
-  { id: "b2", name: "Somethinc" },
-  { id: "b3", name: "Wardah" },
-  { id: "b4", name: "Scarlett" },
-  { id: "b5", name: "Emina" },
-  { id: "b6", name: "The Originote" },
-])
-
-const [categoryOptions, setCategoryOptions] = React.useState([
-  { id: "c1", name: "Skincare" },
-  { id: "c2", name: "Fragrance" },
-  { id: "c3", name: "Makeup" },
-  { id: "c4", name: "Bodycare" },
-  { id: "c5", name: "Haircare" },
-  { id: "c6", name: "Fashion" },
-  { id: "c7", name: "Bags" },
-  { id: "c8", name: "Shoes" },
-  { id: "c9", name: "Beauty Tools" },
-])
-
 const emptyForm = {
   name: "",
   slug: "",
@@ -262,6 +241,25 @@ export default function ProdukPage() {
   const [errors, setErrors] = React.useState<Record<string, string>>({})
   const [syncingId, setSyncingId] = React.useState<string | null>(null)
   const [syncingAll, setSyncingAll] = React.useState(false)
+  const [brandOptions, setBrandOptions] = React.useState([
+    { id: "b1", name: "Skintific" },
+    { id: "b2", name: "Somethinc" },
+    { id: "b3", name: "Wardah" },
+    { id: "b4", name: "Scarlett" },
+    { id: "b5", name: "Emina" },
+    { id: "b6", name: "The Originote" },
+  ])
+  const [categoryOptions, setCategoryOptions] = React.useState([
+    { id: "c1", name: "Skincare" },
+    { id: "c2", name: "Fragrance" },
+    { id: "c3", name: "Makeup" },
+    { id: "c4", name: "Bodycare" },
+    { id: "c5", name: "Haircare" },
+    { id: "c6", name: "Fashion" },
+    { id: "c7", name: "Bags" },
+    { id: "c8", name: "Shoes" },
+    { id: "c9", name: "Beauty Tools" },
+  ])
 
   React.useEffect(() => {
     async function fetchData() {

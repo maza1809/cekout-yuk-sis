@@ -33,8 +33,7 @@ export function BottomNav() {
               {isActive && (
                 <span className="absolute -top-1 left-1/2 h-1 w-8 -translate-x-1/2 rounded-full bg-primary" />
               )}
-              <item.icon className={cn("h-5 w-5", isActive && "fill-primary/10")} />
-              <span className="text-[0.6rem] font-medium tracking-tight">{item.label}</span>
+              <item.icon className={cn("h-6 w-6", isActive && "fill-primary/10")} />
             </Link>
           )
         })}

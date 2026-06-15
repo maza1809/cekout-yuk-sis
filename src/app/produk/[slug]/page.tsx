@@ -257,16 +257,6 @@ const demoProducts: Product[] = [
   },
 ]
 
-const [products, setProducts] = useState<Product[]>(demoProducts)
-
-useEffect(() => {
-  async function fetchData() {
-    const data = await db.products({ published: true })
-    if (data && data.length > 0) setProducts(data)
-  }
-  fetchData()
-}, [])
-
 function FacebookIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -350,9 +340,18 @@ export default function ProductDetailPage() {
   const params = useParams()
   const slug = params.slug as string
   const [selectedImage, setSelectedImage] = useState(0)
+  const [products, setProducts] = useState<Product[]>(demoProducts)
 
   useEffect(() => {
     window.scrollTo(0, 0)
+  }, [])
+
+  useEffect(() => {
+    async function fetchData() {
+      const data = await db.products({ published: true })
+      if (data && data.length > 0) setProducts(data)
+    }
+    fetchData()
   }, [])
 
   const product = useMemo(() => products.find((p) => p.slug === slug), [products, slug])
