@@ -16,7 +16,6 @@ const NAV_LINKS = [
 ]
 
 const SERVICE_LINKS = [
-  { label: "Hubungi Kami", href: "/hubungi-kami" },
   { label: "Kebijakan Privasi", href: "/kebijakan-privasi" },
   { label: "Syarat & Ketentuan", href: "/syarat-ketentuan" },
   { label: "Disclaimer", href: "/disclaimer" },
