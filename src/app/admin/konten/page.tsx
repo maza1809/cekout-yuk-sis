@@ -56,15 +56,6 @@ const defaultPages: PageContent[] = [
     meta_description: "Disclaimer Cekout Yuk Sis platform kurasi produk.",
     is_published: false,
   },
-  {
-    id: "p5",
-    slug: "hubungi-kami",
-    title: "Hubungi Kami",
-    content: "<h2>Hubungi Kami</h2>\n<p>Silakan hubungi kami melalui email atau media sosial untuk pertanyaan, saran, atau kerjasama.</p>\n<p>Email: support@cekoutyuk.sis</p>",
-    meta_title: "Hubungi Kami - Cekout Yuk Sis",
-    meta_description: "Hubungi tim Cekout Yuk Sis untuk pertanyaan dan kerjasama.",
-    is_published: true,
-  },
 ]
 
 type FormData = {
