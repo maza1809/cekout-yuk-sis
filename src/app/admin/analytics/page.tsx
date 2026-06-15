@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { db } from "@/lib/services/supabase-service"
 import { AnalyticsData } from "@/types"
 import {
   BarChart,
@@ -174,7 +175,17 @@ const deviceIcons: Record<string, React.ReactNode> = {
 
 export default function AnalyticsPage() {
   const [range, setRange] = React.useState("7")
-  const data = demoAnalytics[range] || demoAnalytics["7"]
+  const [analytics, setAnalytics] = React.useState<AnalyticsData | null>(null)
+  const [loading, setLoading] = React.useState(true)
+
+  React.useEffect(() => {
+    db.getAnalytics().then((data) => {
+      if (data) setAnalytics(data)
+      setLoading(false)
+    })
+  }, [])
+
+  const data = analytics || demoAnalytics[range] || demoAnalytics["7"]
 
   return (
     <div className="space-y-6">

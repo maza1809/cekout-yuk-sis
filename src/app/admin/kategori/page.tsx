@@ -24,6 +24,7 @@ import {
 import { slugify } from "@/lib/utils"
 import { CATEGORY_ICONS } from "@/lib/constants"
 import { Category } from "@/types"
+import { db } from "@/lib/services/supabase-service"
 import { toast } from "sonner"
 import {
   Plus,
@@ -100,6 +101,14 @@ export default function KategoriPage() {
   const [form, setForm] = React.useState<FormData>(emptyForm)
   const [errors, setErrors] = React.useState<Record<string, string>>({})
 
+  React.useEffect(() => {
+    async function fetchData() {
+      const data = await db.categories(false)
+      if (data && data.length > 0) setCategories(data)
+    }
+    fetchData()
+  }, [])
+
   const sorted = [...categories].sort((a, b) => a.sort_order - b.sort_order)
   const filtered = sorted.filter((c) => {
     const q = search.toLowerCase()
@@ -140,18 +149,20 @@ export default function KategoriPage() {
     return Object.keys(errs).length === 0
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validate()) return
     const now = new Date().toISOString()
 
     if (editingId) {
+      const updated = { ...form, id: editingId, updated_at: now }
       setCategories((prev) =>
         prev.map((c) =>
           c.id === editingId
-            ? { ...c, ...form, updated_at: now }
+            ? { ...c, ...updated }
             : c
         )
       )
+      await db.upsertCategory(updated)
       toast.success("Kategori berhasil diperbarui")
     } else {
       const newCat: Category = {
@@ -167,33 +178,51 @@ export default function KategoriPage() {
         sort_order: form.sort_order,
       }
       setCategories((prev) => [...prev, newCat])
+      await db.upsertCategory(newCat)
       toast.success("Kategori berhasil ditambahkan")
     }
     setDialogOpen(false)
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteId) return
     setCategories((prev) => prev.filter((c) => c.id !== deleteId))
+    await db.deleteCategory(deleteId)
     toast.success("Kategori berhasil dihapus")
     setDeleteDialogOpen(false)
     setDeleteId(null)
   }
 
-  const toggleActive = (id: string) => {
-    setCategories((prev) =>
-      prev.map((c) =>
-        c.id === id ? { ...c, is_active: !c.is_active, updated_at: new Date().toISOString() } : c
-      )
-    )
+  const toggleActive = async (id: string) => {
+    const now = new Date().toISOString()
+    let updated: Category | undefined
+    setCategories((prev) => {
+      const next = prev.map((c) => {
+        if (c.id === id) {
+          updated = { ...c, is_active: !c.is_active, updated_at: now }
+          return updated
+        }
+        return c
+      })
+      return next
+    })
+    if (updated) await db.upsertCategory(updated)
   }
 
-  const updateSortOrder = (id: string, newOrder: number) => {
-    setCategories((prev) =>
-      prev.map((c) =>
-        c.id === id ? { ...c, sort_order: newOrder, updated_at: new Date().toISOString() } : c
-      )
-    )
+  const updateSortOrder = async (id: string, newOrder: number) => {
+    const now = new Date().toISOString()
+    let updated: Category | undefined
+    setCategories((prev) => {
+      const next = prev.map((c) => {
+        if (c.id === id) {
+          updated = { ...c, sort_order: newOrder, updated_at: now }
+          return updated
+        }
+        return c
+      })
+      return next
+    })
+    if (updated) await db.upsertCategory(updated)
   }
 
   return (

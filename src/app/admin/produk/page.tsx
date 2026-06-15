@@ -25,6 +25,7 @@ import {
 import { formatPrice, slugify, truncate } from "@/lib/utils"
 import { AFFILIATE_PLATFORMS } from "@/lib/constants"
 import { Product } from "@/types"
+import { db } from "@/lib/services/supabase-service"
 import { toast } from "sonner"
 import {
   Plus,
@@ -203,16 +204,16 @@ const defaultProducts: Product[] = [
   },
 ]
 
-const brandOptions = [
+const [brandOptions, setBrandOptions] = React.useState([
   { id: "b1", name: "Skintific" },
   { id: "b2", name: "Somethinc" },
   { id: "b3", name: "Wardah" },
   { id: "b4", name: "Scarlett" },
   { id: "b5", name: "Emina" },
   { id: "b6", name: "The Originote" },
-]
+])
 
-const categoryOptions = [
+const [categoryOptions, setCategoryOptions] = React.useState([
   { id: "c1", name: "Skincare" },
   { id: "c2", name: "Fragrance" },
   { id: "c3", name: "Makeup" },
@@ -222,7 +223,7 @@ const categoryOptions = [
   { id: "c7", name: "Bags" },
   { id: "c8", name: "Shoes" },
   { id: "c9", name: "Beauty Tools" },
-]
+])
 
 const emptyForm = {
   name: "",
@@ -263,10 +264,20 @@ export default function ProdukPage() {
   const [syncingAll, setSyncingAll] = React.useState(false)
 
   React.useEffect(() => {
-    const imported = JSON.parse(localStorage.getItem("imported_products") || "[]")
-    if (imported.length > 0) {
-      setProducts((prev) => [...imported, ...prev])
+    async function fetchData() {
+      const data = await db.products()
+      if (data && data.length > 0) setProducts(data)
     }
+    fetchData()
+  }, [])
+
+  React.useEffect(() => {
+    async function fetchOptions() {
+      const [brands, cats] = await Promise.all([db.brands(), db.categories(false)])
+      if (brands.length) setBrandOptions(brands.map(b => ({ id: b.slug, name: b.name })))
+      if (cats.length) setCategoryOptions(cats.map(c => ({ id: c.slug, name: c.name })))
+    }
+    fetchOptions()
   }, [])
 
   const newestProductIds = React.useMemo(() => {
@@ -352,7 +363,7 @@ export default function ProdukPage() {
     return Object.keys(errs).length === 0
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validate()) return
     const tags = form.tags
       .split(",")
@@ -362,20 +373,22 @@ export default function ProdukPage() {
     const now = new Date().toISOString()
 
     if (editingId) {
+      const updated = {
+        ...form,
+        id: editingId,
+        original_price: form.original_price || undefined,
+        tags,
+        images,
+        updated_at: now,
+      }
       setProducts((prev) =>
         prev.map((p) =>
           p.id === editingId
-            ? {
-                ...p,
-                ...form,
-                original_price: form.original_price || undefined,
-                tags,
-                images,
-                updated_at: now,
-              }
+            ? { ...p, ...updated }
             : p
         )
       )
+      await db.upsertProduct(updated)
       toast.success("Produk berhasil diperbarui")
     } else {
       const newProduct: Product = {
@@ -406,25 +419,35 @@ export default function ProdukPage() {
         click_count: 0,
       }
       setProducts((prev) => [newProduct, ...prev])
+      await db.upsertProduct(newProduct)
       toast.success("Produk berhasil ditambahkan")
     }
     setDialogOpen(false)
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteId) return
     setProducts((prev) => prev.filter((p) => p.id !== deleteId))
+    await db.deleteProduct(deleteId)
     toast.success("Produk berhasil dihapus")
     setDeleteDialogOpen(false)
     setDeleteId(null)
   }
 
-  const togglePublish = (id: string) => {
-    setProducts((prev) =>
-      prev.map((p) =>
-        p.id === id ? { ...p, is_published: !p.is_published, updated_at: new Date().toISOString() } : p
-      )
-    )
+  const togglePublish = async (id: string) => {
+    const now = new Date().toISOString()
+    let updated: Product | undefined
+    setProducts((prev) => {
+      const next = prev.map((p) => {
+        if (p.id === id) {
+          updated = { ...p, is_published: !p.is_published, updated_at: now }
+          return updated
+        }
+        return p
+      })
+      return next
+    })
+    if (updated) await db.upsertProduct(updated)
   }
 
   const handleSync = async (product: Product) => {

@@ -74,6 +74,7 @@ export interface Category {
   icon: string
   is_active: boolean
   sort_order: number
+  productCount?: number
 }
 
 export interface Banner {
@@ -98,6 +99,8 @@ export interface SocialMedia {
   description: string
   is_active: boolean
   sort_order: number
+  created_at?: string
+  updated_at?: string
 }
 
 export interface SiteSetting {

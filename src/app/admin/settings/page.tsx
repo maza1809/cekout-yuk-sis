@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { db } from "@/lib/services/supabase-service"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -102,9 +103,37 @@ export default function SettingsPage() {
     return saved?.social || defaultSocial
   })
 
+  React.useEffect(() => {
+    db.settings().then((rows) => {
+      if (!rows.length) return
+      const map: Record<string, string> = {}
+      for (const r of rows) map[r.key] = r.value
+      try {
+        if (map.admin_general) setGeneral(JSON.parse(map.admin_general))
+      } catch {}
+      try {
+        if (map.admin_seo_defaults) setSeo(JSON.parse(map.admin_seo_defaults))
+      } catch {}
+      try {
+        if (map.admin_scripts) setScripts(JSON.parse(map.admin_scripts))
+      } catch {}
+      try {
+        if (map.admin_social) setSocial(JSON.parse(map.admin_social))
+      } catch {}
+    })
+  }, [])
+
+  const saveToSupabase = () => {
+    db.upsertSetting({ key: "admin_general", value: JSON.stringify(general), type: "json" })
+    db.upsertSetting({ key: "admin_seo_defaults", value: JSON.stringify(seo), type: "json" })
+    db.upsertSetting({ key: "admin_scripts", value: JSON.stringify(scripts), type: "json" })
+    db.upsertSetting({ key: "admin_social", value: JSON.stringify(social), type: "json" })
+  }
+
   const handleSave = () => {
     const data = { general, seo, scripts, social }
     localStorage.setItem("admin_settings", JSON.stringify(data))
+    saveToSupabase()
     toast.success("Pengaturan berhasil disimpan")
   }
 

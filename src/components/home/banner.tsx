@@ -4,7 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { supabase } from "@/lib/supabase"
+import { db } from "@/lib/services/supabase-service"
 import { Button } from "@/components/ui/button"
 import type { Banner } from "@/types"
 
@@ -55,15 +55,7 @@ export function BannerSection() {
 
   React.useEffect(() => {
     async function fetchBanners() {
-      if (!supabase) {
-        setBanners(demoBanners)
-        return
-      }
-      const { data } = await supabase
-        .from("banners")
-        .select("*")
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true })
+      const data = await db.banners()
       if (data && data.length > 0) {
         setBanners(data)
       } else {

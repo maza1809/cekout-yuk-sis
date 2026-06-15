@@ -7,6 +7,7 @@ import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
+import { supabase } from "@/lib/supabase"
 import { LogIn, Eye, EyeOff } from "lucide-react"
 
 const DEMO_CREDENTIALS = [
@@ -22,11 +23,11 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = React.useState(false)
   const [loading, setLoading] = React.useState(false)
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
-    setTimeout(() => {
+    const tryLocal = () => {
       const stored = localStorage.getItem("cekoutyuk_admin_users")
       let adminUsers: { email: string; password?: string; name: string; role: string }[] = []
       if (stored) {
@@ -47,25 +48,51 @@ export default function LoginPage() {
         (c) => c.email === email && c.password === password
       )
 
-      if (user) {
-        localStorage.setItem(
-          "admin_user",
-          JSON.stringify({
-            id: email,
-            email: user.email,
-            name: user.name,
-            role: user.role,
-            is_active: true,
-          })
-        )
-        toast.success(`Selamat datang, ${user.name}!`)
-        router.push("/admin/dashboard")
-      } else {
-        toast.error("Email atau password salah")
-      }
-
+      return user
+    }
+    const localUser = tryLocal()
+    if (localUser) {
+      localStorage.setItem(
+        "admin_user",
+        JSON.stringify({
+          id: email,
+          email: localUser.email,
+          name: localUser.name,
+          role: localUser.role,
+          is_active: true,
+        })
+      )
+      toast.success(`Selamat datang, ${localUser.name}!`)
+      router.push("/admin/dashboard")
       setLoading(false)
-    }, 1000)
+      return
+    }
+
+    if (supabase) {
+      const { data: authData } = await supabase.auth.signInWithPassword({ email, password })
+      if (authData?.user) {
+        const { data: userData } = await supabase.from("users").select("*").eq("email", email).single()
+        if (userData) {
+          localStorage.setItem(
+            "admin_user",
+            JSON.stringify({
+              id: userData.id,
+              email: userData.email,
+              name: userData.name,
+              role: userData.role,
+              is_active: true,
+            })
+          )
+          toast.success(`Selamat datang, ${userData.name}!`)
+          router.push("/admin/dashboard")
+          setLoading(false)
+          return
+        }
+      }
+    }
+
+    toast.error("Email atau password salah")
+    setLoading(false)
   }
 
   return (

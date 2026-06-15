@@ -15,6 +15,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { SocialMedia } from "@/types"
+import { db } from "@/lib/services/supabase-service"
 
 import { toast } from "sonner"
 import { Pencil, AtSign } from "lucide-react"
@@ -50,6 +51,12 @@ export default function SosialMediaPage() {
   const [form, setForm] = React.useState<FormData>({ url: "", description: "" })
   const [errors, setErrors] = React.useState<Record<string, string>>({})
 
+  React.useEffect(() => {
+    db.socialMedia(false).then((data) => {
+      if (data.length > 0) setPlatforms(data)
+    })
+  }, [])
+
   const handleOpenEdit = (item: SocialMedia) => {
     setEditingId(item.id)
     setForm({ url: item.url, description: item.description })
@@ -67,23 +74,28 @@ export default function SosialMediaPage() {
   const handleSave = () => {
     if (!validate()) return
     if (!editingId) return
-      setPlatforms((prev) =>
-        prev.map((p) =>
-          p.id === editingId
-            ? { ...p, url: form.url, description: form.description, updated_at: new Date().toISOString() }
-            : p
-        )
+    setPlatforms((prev) =>
+      prev.map((p) =>
+        p.id === editingId
+          ? { ...p, url: form.url, description: form.description, updated_at: new Date().toISOString() }
+          : p
       )
+    )
+    db.upsertSocialMedia({ ...form, id: editingId, updated_at: new Date().toISOString() })
     toast.success("Platform berhasil diperbarui")
     setEditDialogOpen(false)
   }
 
   const toggleActive = (id: string) => {
-    setPlatforms((prev) =>
-      prev.map((p) =>
+    setPlatforms((prev) => {
+      const target = prev.find((p) => p.id === id)
+      if (target) {
+        db.upsertSocialMedia({ ...target, is_active: !target.is_active, updated_at: new Date().toISOString() })
+      }
+      return prev.map((p) =>
         p.id === id ? { ...p, is_active: !p.is_active, updated_at: new Date().toISOString() } : p
       )
-    )
+    })
   }
 
   return (

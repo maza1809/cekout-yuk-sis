@@ -20,6 +20,7 @@ import { cn, formatPrice } from "@/lib/utils"
 import { staggerContainer, fadeInLeft, fadeInRight } from "@/lib/animations"
 import { SITE_URL } from "@/lib/constants"
 import { type Product } from "@/types"
+import { db } from "@/lib/services/supabase-service"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
@@ -256,6 +257,16 @@ const demoProducts: Product[] = [
   },
 ]
 
+const [products, setProducts] = useState<Product[]>(demoProducts)
+
+useEffect(() => {
+  async function fetchData() {
+    const data = await db.products({ published: true })
+    if (data && data.length > 0) setProducts(data)
+  }
+  fetchData()
+}, [])
+
 function FacebookIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -344,7 +355,7 @@ export default function ProductDetailPage() {
     window.scrollTo(0, 0)
   }, [])
 
-  const product = useMemo(() => demoProducts.find((p) => p.slug === slug), [slug])
+  const product = useMemo(() => products.find((p) => p.slug === slug), [products, slug])
 
   if (!product) return <NotFound />
 
@@ -378,23 +389,23 @@ export default function ProductDetailPage() {
 
   const newestProductIds = useMemo(() => {
     return new Set(
-      [...demoProducts]
+      [...products]
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         .slice(0, 12)
         .map((p) => p.id)
     )
-  }, [])
+  }, [products])
 
   const topTrendingIds = useMemo(() => {
     return new Set(
-      [...demoProducts]
+      [...products]
         .sort((a, b) => b.click_count - a.click_count)
         .slice(0, 12)
         .map((p) => p.id)
     )
-  }, [])
+  }, [products])
 
-  const relatedProducts = demoProducts
+  const relatedProducts = products
     .filter((p) => p.id !== product.id && p.category_id === product.category_id)
     .slice(0, 4)
     .map((p) => ({ ...p, is_new: newestProductIds.has(p.id) }))

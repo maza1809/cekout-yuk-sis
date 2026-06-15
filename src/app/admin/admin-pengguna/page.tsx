@@ -21,6 +21,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
+import { db } from "@/lib/services/supabase-service"
 import { AdminUser } from "@/types"
 import { getInitials } from "@/lib/utils"
 import { toast } from "sonner"
@@ -66,6 +67,19 @@ export default function AdminPenggunaPage() {
     } else {
       setUsers(defaultUsers)
     }
+    db.adminUsers().then((supabaseUsers) => {
+      if (supabaseUsers.length > 0) {
+        setUsers((prev) => {
+          const merged = [...supabaseUsers]
+          for (const u of prev) {
+            if (!merged.find((m) => m.id === u.id)) {
+              merged.push(u)
+            }
+          }
+          return merged
+        })
+      }
+    })
   }, [])
 
   React.useEffect(() => {
@@ -129,6 +143,7 @@ export default function AdminPenggunaPage() {
       setUsers((prev) =>
         prev.map((u) => (u.id === editingId ? { ...u, ...updates } : u))
       )
+      db.upsertAdminUser({ id: editingId, ...updates } as AdminUser)
       toast.success("Pengguna berhasil diperbarui")
     } else {
       const newUser: StoredUser = {
@@ -142,6 +157,7 @@ export default function AdminPenggunaPage() {
         password: form.password,
       }
       setUsers((prev) => [...prev, newUser])
+      db.upsertAdminUser(newUser as AdminUser)
       toast.success("Pengguna berhasil ditambahkan")
     }
     setDialogOpen(false)
@@ -150,17 +166,21 @@ export default function AdminPenggunaPage() {
   const handleDelete = () => {
     if (!deleteId) return
     setUsers((prev) => prev.filter((u) => u.id !== deleteId))
+    db.deleteAdminUser(deleteId)
     toast.success("Pengguna berhasil dihapus")
     setDeleteDialogOpen(false)
     setDeleteId(null)
   }
 
   const toggleActive = (id: string) => {
-    setUsers((prev) =>
-      prev.map((u) =>
+    setUsers((prev) => {
+      const updated = prev.map((u) =>
         u.id === id ? { ...u, is_active: !u.is_active } : u
       )
-    )
+      const toggled = updated.find((u) => u.id === id)
+      if (toggled) db.upsertAdminUser({ id, is_active: toggled.is_active } as AdminUser)
+      return updated
+    })
   }
 
   return (

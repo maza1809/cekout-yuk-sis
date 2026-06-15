@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { db } from "@/lib/services/supabase-service"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -91,10 +92,39 @@ export default function SEOPage() {
     return defaultSEO["beranda"]
   })
 
+  React.useEffect(() => {
+    db.seoMeta().then((rows) => {
+      if (!rows.length) return
+      const merged: Record<string, PageSEO> = { ...seoData }
+      for (const row of rows) {
+        merged[row.page] = {
+          title: row.title,
+          description: row.description,
+          keywords: row.keywords,
+          og_image: row.og_image,
+          canonical_url: row.canonical_url,
+          schema_markup: row.schema_markup,
+        }
+      }
+      setSeoData(merged)
+      setForm(merged[selectedPage] || merged["beranda"])
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const handleSave = () => {
     const updated = { ...seoData, [selectedPage]: form }
     setSeoData(updated)
     localStorage.setItem("admin_seo", JSON.stringify(updated))
+    db.upsertSeoMeta({
+      page: selectedPage,
+      title: form.title,
+      description: form.description,
+      keywords: form.keywords,
+      og_image: form.og_image,
+      canonical_url: form.canonical_url,
+      schema_markup: form.schema_markup,
+    })
     toast.success("SEO berhasil disimpan")
   }
 

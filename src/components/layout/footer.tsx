@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Heart, Loader2, CheckCircle } from "lucide-react"
 import { FaInstagram, FaFacebook, FaXTwitter, FaYoutube, FaTiktok, FaThreads } from "react-icons/fa6"
 import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/constants"
-import { supabase } from "@/lib/supabase"
+import { db } from "@/lib/services/supabase-service"
 
 const NAV_LINKS = [
   { label: "Beranda", href: "/" },
@@ -40,14 +40,8 @@ export function Footer() {
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return
     setLoading(true)
     try {
-      if (!supabase) {
-        setSuccess(true)
-        setEmail("")
-        setTimeout(() => setSuccess(false), 3000)
-        return
-      }
-      const { error } = await supabase.from("subscribers").insert({ email })
-      if (error && error.code !== "23505") throw error
+      const ok = await db.addSubscriber(email)
+      if (!ok) throw new Error("Gagal subscribe")
       setSuccess(true)
       setEmail("")
       setTimeout(() => setSuccess(false), 3000)

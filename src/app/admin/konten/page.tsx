@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { db } from "@/lib/services/supabase-service"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -74,6 +75,12 @@ export default function KontenPage() {
   })
   const [errors, setErrors] = React.useState<Record<string, string>>({})
 
+  React.useEffect(() => {
+    db.pages(false).then((rows) => {
+      if (rows.length) setPages(rows)
+    })
+  }, [])
+
   const handleOpenEdit = (page: PageContent) => {
     setEditingId(page.id)
     setForm({
@@ -98,8 +105,8 @@ export default function KontenPage() {
   const handleSave = () => {
     if (!validate()) return
     if (!editingId) return
-    setPages((prev) =>
-      prev.map((p) =>
+    setPages((prev) => {
+      const updated = prev.map((p) =>
         p.id === editingId
           ? {
               ...p,
@@ -108,21 +115,46 @@ export default function KontenPage() {
               meta_description: form.meta_description,
               content: form.content,
               is_published: form.is_published,
-              updated_at: new Date().toISOString(),
             }
           : p
       )
-    )
+      const page = updated.find((p) => p.id === editingId)
+      if (page) {
+        db.upsertPage({
+          id: page.id,
+          slug: page.slug,
+          title: page.title,
+          content: page.content,
+          meta_title: page.meta_title,
+          meta_description: page.meta_description,
+          is_published: page.is_published,
+        })
+      }
+      return updated
+    })
     toast.success("Halaman berhasil diperbarui")
     setEditDialogOpen(false)
   }
 
   const togglePublish = (id: string) => {
-    setPages((prev) =>
-      prev.map((p) =>
+    setPages((prev) => {
+      const updated = prev.map((p) =>
         p.id === id ? { ...p, is_published: !p.is_published } : p
       )
-    )
+      const page = updated.find((p) => p.id === id)
+      if (page) {
+        db.upsertPage({
+          id: page.id,
+          slug: page.slug,
+          title: page.title,
+          content: page.content,
+          meta_title: page.meta_title,
+          meta_description: page.meta_description,
+          is_published: page.is_published,
+        })
+      }
+      return updated
+    })
     toast.success("Status publikasi diubah")
   }
 

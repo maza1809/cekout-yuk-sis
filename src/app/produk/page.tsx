@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { motion } from "framer-motion"
 import { staggerContainer } from "@/lib/animations"
 import {
@@ -37,6 +37,7 @@ import { formatPrice } from "@/lib/utils"
 import { type Product, type SortOption } from "@/types"
 import { SORT_OPTIONS, CATEGORY_ICONS } from "@/lib/constants"
 import { FilterSidebar } from "@/components/shared/filter-sidebar"
+import { db } from "@/lib/services/supabase-service"
 
 const iconMap: Record<string, LucideIcon> = {
   Sparkles,
@@ -382,10 +383,23 @@ const demoProducts: Product[] = [
   },
 ]
 
-const brandList = [...new Set(demoProducts.map((p) => p.brand_id))]
-const categoryList = [...new Set(demoProducts.map((p) => p.category_id))]
-
 export default function ProdukPage() {
+  const [products, setProducts] = useState<Product[]>(demoProducts)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchData() {
+      const data = await db.products({ published: true })
+      if (data && data.length > 0) {
+        setProducts(data)
+      }
+      setLoading(false)
+    }
+    fetchData()
+  }, [])
+
+  const brandList = [...new Set(products.map((p) => p.brand_id))]
+  const categoryList = [...new Set(products.map((p) => p.category_id))]
   const [search, setSearch] = useState("")
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [selectedBrands, setSelectedBrands] = useState<string[]>([])
@@ -397,7 +411,7 @@ export default function ProdukPage() {
   const [visibleCount, setVisibleCount] = useState(8)
 
   const filteredProducts = useMemo(() => {
-    let result = [...demoProducts]
+    let result = [...products]
 
     if (search) {
       const q = search.toLowerCase()
@@ -447,7 +461,7 @@ export default function ProdukPage() {
 
   const newestProductIds = useMemo(() => {
     return new Set(
-      [...demoProducts]
+      [...products]
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         .slice(0, 12)
         .map((p) => p.id)
@@ -456,7 +470,7 @@ export default function ProdukPage() {
 
   const topTrendingIds = useMemo(() => {
     return new Set(
-      [...demoProducts]
+      [...products]
         .sort((a, b) => b.click_count - a.click_count)
         .slice(0, 12)
         .map((p) => p.id)

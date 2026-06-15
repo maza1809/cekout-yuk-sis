@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react"
 import { Brand } from "@/types"
 import { defaultBrands } from "@/lib/data/brands"
+import { db } from "@/lib/services/supabase-service"
 
 interface BrandContextType {
   brands: Brand[]
@@ -20,16 +21,20 @@ export function BrandProvider({ children }: { children: React.ReactNode }) {
   const [brands, setBrands] = useState<Brand[]>([])
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) {
-      try {
-        setBrands(JSON.parse(stored))
-      } catch {
+    async function init() {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (stored) {
+        try { setBrands(JSON.parse(stored)); return }
+        catch { /* ignore */ }
+      }
+      const data = await db.brands()
+      if (data && data.length > 0) {
+        setBrands(data)
+      } else {
         setBrands(defaultBrands)
       }
-    } else {
-      setBrands(defaultBrands)
     }
+    init()
   }, [])
 
   useEffect(() => {
@@ -40,16 +45,21 @@ export function BrandProvider({ children }: { children: React.ReactNode }) {
 
   const addBrand = useCallback((brand: Brand) => {
     setBrands((prev) => [brand, ...prev])
+    db.upsertBrand(brand)
   }, [])
 
   const updateBrand = useCallback((id: string, updates: Partial<Brand>) => {
-    setBrands((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, ...updates } : b))
-    )
+    setBrands((prev) => {
+      const updated = prev.map((b) => (b.id === id ? { ...b, ...updates } : b))
+      const found = updated.find((b) => b.id === id)
+      if (found) db.upsertBrand(found)
+      return updated
+    })
   }, [])
 
   const deleteBrand = useCallback((id: string) => {
     setBrands((prev) => prev.filter((b) => b.id !== id))
+    db.deleteBrand(id)
   }, [])
 
   return (

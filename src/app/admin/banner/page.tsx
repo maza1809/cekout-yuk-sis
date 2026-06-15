@@ -15,6 +15,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Banner } from "@/types"
+import { db } from "@/lib/services/supabase-service"
 import { toast } from "sonner"
 import { Plus, Pencil, Trash2, Eye } from "lucide-react"
 
@@ -88,6 +89,12 @@ export default function BannerPage() {
   const [errors, setErrors] = React.useState<Record<string, string>>({})
   const [previewOpen, setPreviewOpen] = React.useState<string | null>(null)
 
+  React.useEffect(() => {
+    db.banners(false).then((data) => {
+      if (data.length > 0) setBanners(data)
+    })
+  }, [])
+
   const filtered = banners.filter((b) => {
     const q = search.toLowerCase()
     return !q || b.title.toLowerCase().includes(q) || b.subtitle.toLowerCase().includes(q)
@@ -134,6 +141,7 @@ export default function BannerPage() {
           b.id === editingId ? { ...b, ...form, updated_at: now } : b
         )
       )
+      db.upsertBanner({ ...form, id: editingId, updated_at: now })
       toast.success("Banner berhasil diperbarui")
     } else {
       const newBanner: Banner = {
@@ -143,6 +151,7 @@ export default function BannerPage() {
         ...form,
       }
       setBanners((prev) => [...prev, newBanner])
+      db.upsertBanner(newBanner)
       toast.success("Banner berhasil ditambahkan")
     }
     setDialogOpen(false)
@@ -151,17 +160,22 @@ export default function BannerPage() {
   const handleDelete = () => {
     if (!deleteId) return
     setBanners((prev) => prev.filter((b) => b.id !== deleteId))
+    db.deleteBanner(deleteId)
     toast.success("Banner berhasil dihapus")
     setDeleteDialogOpen(false)
     setDeleteId(null)
   }
 
   const toggleActive = (id: string) => {
-    setBanners((prev) =>
-      prev.map((b) =>
+    setBanners((prev) => {
+      const target = prev.find((b) => b.id === id)
+      if (target) {
+        db.upsertBanner({ ...target, is_active: !target.is_active, updated_at: new Date().toISOString() })
+      }
+      return prev.map((b) =>
         b.id === id ? { ...b, is_active: !b.is_active, updated_at: new Date().toISOString() } : b
       )
-    )
+    })
   }
 
   return (

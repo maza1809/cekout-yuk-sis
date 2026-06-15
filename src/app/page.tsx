@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { motion } from "framer-motion"
 import { staggerContainer } from "@/lib/animations"
 import {
@@ -12,6 +12,7 @@ import {
   BrandsSection,
 } from "@/components/home"
 import type { Product } from "@/types"
+import { db } from "@/lib/services/supabase-service"
 
 const demoProducts: Product[] = [
   {
@@ -280,22 +281,51 @@ const demoProducts: Product[] = [
   },
 ]
 
-const newestProducts = [...demoProducts].sort(
-  (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-)
-const newProducts = newestProducts.slice(0, 4).map((p) => ({ ...p, is_new: true }))
-const topTrending = [...demoProducts].sort((a, b) => b.click_count - a.click_count)
-const trendingProducts = topTrending.slice(0, 4)
-
 export default function HomePage() {
+  const [products, setProducts] = useState<Product[]>(demoProducts)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const data = await db.products({ published: true })
+        if (data && data.length > 0) {
+          setProducts(data)
+        }
+      } catch {
+        console.error("Failed to fetch products from Supabase")
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
+
+  const newestProducts = useMemo(() => {
+    return [...products].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    )
+  }, [products])
+
+  const newProducts = useMemo(() =>
+    newestProducts.slice(0, 4).map((p) => ({ ...p, is_new: true })),
+    [newestProducts]
+  )
+
+  const trending = useMemo(() =>
+    [...products].sort((a, b) => b.click_count - a.click_count),
+    [products]
+  )
+  const trendingProducts = useMemo(() => trending.slice(0, 4), [trending])
+
   const topTrendingIds = useMemo(() => {
     return new Set(
-      [...demoProducts]
+      [...products]
         .sort((a, b) => b.click_count - a.click_count)
         .slice(0, 12)
         .map((p) => p.id)
     )
-  }, [])
+  }, [products])
 
   return (
     <motion.div

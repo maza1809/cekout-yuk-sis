@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { motion } from "framer-motion"
 import { staggerContainer } from "@/lib/animations"
 import {
@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useBrands } from "@/contexts/brand-context"
+import { db } from "@/lib/services/supabase-service"
 import type { Product } from "@/types"
 
 const demoProducts: Product[] = [
@@ -133,6 +134,16 @@ const demoProducts: Product[] = [
   },
 ]
 
+const [products, setProducts] = useState<Product[]>(demoProducts)
+
+useEffect(() => {
+  async function fetchData() {
+    const data = await db.products({ published: true })
+    if (data && data.length > 0) setProducts(data)
+  }
+  fetchData()
+}, [])
+
 const tabs = [
   { id: "all", label: "Semua Produk" },
 ] as const
@@ -150,23 +161,23 @@ export default function BrandDetailPage() {
 
   const newestProductIds = useMemo(() => {
     return new Set(
-      [...demoProducts]
+      [...products]
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         .slice(0, 12)
         .map((p) => p.id)
     )
-  }, [])
+  }, [products])
 
   const topTrendingIds = useMemo(() => {
     return new Set(
-      [...demoProducts]
+      [...products]
         .sort((a, b) => b.click_count - a.click_count)
         .slice(0, 12)
         .map((p) => p.id)
     )
-  }, [])
+  }, [products])
 
-  const brandProducts = demoProducts.filter((p) => p.brand_id === slug).map((p) => ({
+  const brandProducts = products.filter((p) => p.brand_id === slug).map((p) => ({
     ...p,
     is_new: newestProductIds.has(p.id),
   }))
