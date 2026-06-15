@@ -1,0 +1,6 @@
+export { HeroSection } from "./hero"
+export { BannerSection } from "./banner"
+export { CategoriesSection } from "./categories"
+export { NewProducts } from "./new-products"
+export { TrendingProducts } from "./trending-products"
+export { BrandsSection } from "./brands-section"

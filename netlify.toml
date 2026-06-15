@@ -1,0 +1,40 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NEXT_PRIVATE_STANDALONE = "true"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[headers]
+  # Security headers
+  [[headers.for]]
+    for = "/*"
+    [headers.values]
+      X-Frame-Options = "DENY"
+      X-Content-Type-Options = "nosniff"
+      Referrer-Policy = "strict-origin-when-cross-origin"
+      Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+  # Cache static assets
+  [[headers.for]]
+    for = "/_next/static/*"
+    [headers.values]
+      Cache-Control = "public, max-age=31536000, immutable"
+
+  [[headers.for]]
+    for = "/static/*"
+    [headers.values]
+      Cache-Control = "public, max-age=31536000, immutable"
+
+  [[headers.for]]
+    for = "/favicon.ico"
+    [headers.values]
+      Cache-Control = "public, max-age=86400"
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/next-handler"
+  status = 200
