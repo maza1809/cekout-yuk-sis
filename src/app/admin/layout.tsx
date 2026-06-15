@@ -21,7 +21,6 @@ import {
   Share2,
   Users,
   Search,
-  BarChart3,
   Settings,
   Menu,
   Bell,
@@ -42,7 +41,7 @@ const allNavItems = [
   { href: "/admin/sosial-media", label: "Sosial Media", icon: Share2, roles: ["superadmin"] },
   { href: "/admin/admin-pengguna", label: "Admin Pengguna", icon: Users, roles: ["superadmin"] },
   { href: "/admin/seo", label: "SEO", icon: Search, roles: ["superadmin"] },
-  { href: "/admin/analytics", label: "Analytics", icon: BarChart3, roles: ["superadmin", "admin"] },
+
   { href: "/admin/settings", label: "Settings", icon: Settings, roles: ["superadmin"] },
 ]
 
