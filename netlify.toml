@@ -31,7 +31,4 @@
   [headers.values]
     Cache-Control = "public, max-age=86400"
 
-[[redirects]]
-  from = "/*"
-  to = "/.netlify/functions/next-handler"
-  status = 200
+
